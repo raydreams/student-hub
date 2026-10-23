@@ -11,9 +11,9 @@ import {
 import type { ProgressPoint } from '../data/types'
 
 const copColors: Record<ProgressPoint['type'], string> = {
-  conversation: '#2563eb',
-  observation: '#16a34a',
-  product: '#ea580c',
+  conversation: '#38bdf8',
+  observation: '#34d399',
+  product: '#fb923c',
 }
 
 interface ExpectationProgressChartProps {
@@ -27,7 +27,7 @@ export function ExpectationProgressChart({
   points,
   yMin = 50,
   yMax = 95,
-  dark = false,
+  dark = true,
 }: ExpectationProgressChartProps) {
   const data = points.map((p) => ({
     ...p,
@@ -35,26 +35,45 @@ export function ExpectationProgressChart({
     y: p.value,
   }))
 
+  const gridColor = dark ? '#172642' : '#cbd5e1'
+  const textColor = dark ? '#8b9cb8' : '#64748b'
+
   return (
     <div className="h-36 w-full min-w-[200px]">
       <ResponsiveContainer width="100%" height="100%">
-        <ScatterChart margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-          <ReferenceArea y1={yMin} y2={60} fill="#fecaca" fillOpacity={0.45} />
-          <ReferenceArea y1={60} y2={70} fill="#fef08a" fillOpacity={0.5} />
-          <ReferenceArea y1={70} y2={yMax} fill="#f0fdf4" fillOpacity={0.6} />
-          <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" />
+        <ScatterChart margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
+          {/* Shaded bands for Level 2 (50-60), Level 3 (60-70), Level 4 (70-100) */}
+          <ReferenceArea
+            y1={yMin}
+            y2={60}
+            fill={dark ? '#ef4444' : '#fecaca'}
+            fillOpacity={dark ? 0.08 : 0.45}
+          />
+          <ReferenceArea
+            y1={60}
+            y2={70}
+            fill={dark ? '#eab308' : '#fef08a'}
+            fillOpacity={dark ? 0.08 : 0.5}
+          />
+          <ReferenceArea
+            y1={70}
+            y2={yMax}
+            fill={dark ? '#3b82f6' : '#f0fdf4'}
+            fillOpacity={dark ? 0.09 : 0.6}
+          />
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} opacity={0.5} />
           <XAxis
             type="number"
             dataKey="x"
             name="Time"
             domain={[0, 'dataMax + 1']}
-            tick={{ fontSize: 10, fill: '#64748b' }}
+            tick={{ fontSize: 10, fill: textColor }}
             label={{
-              value: 'time',
+              value: 'timeline',
               position: 'insideBottom',
               offset: -2,
               fontSize: 10,
-              fill: '#64748b',
+              fill: textColor,
             }}
           />
           <YAxis
@@ -62,11 +81,18 @@ export function ExpectationProgressChart({
             dataKey="y"
             domain={[yMin, yMax]}
             ticks={[50, 60, 70, 80, 90]}
-            tick={{ fontSize: 10, fill: '#64748b' }}
+            tick={{ fontSize: 10, fill: textColor }}
             width={28}
           />
           <Tooltip
             cursor={{ strokeDasharray: '3 3' }}
+            contentStyle={{
+              backgroundColor: '#0c1427',
+              borderColor: 'rgba(59, 130, 246, 0.3)',
+              borderRadius: '0.75rem',
+              color: '#f8fafc',
+              fontSize: '12px',
+            }}
             formatter={(value, _name, item) => {
               const v = typeof value === 'number' ? value : Number(value)
               const payload = item?.payload as ProgressPoint | undefined
@@ -85,7 +111,9 @@ export function ExpectationProgressChart({
                   width={10}
                   height={10}
                   fill={fill}
-                  rx={1}
+                  rx={2}
+                  stroke="#ffffff"
+                  strokeWidth={0.5}
                 />
               )
             }}

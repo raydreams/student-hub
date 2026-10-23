@@ -46,55 +46,57 @@ export function AdminDashboard() {
   }
 
   return (
-    <AppShell title="School Admin — Unionville HS">
-      <div className="mb-4 flex flex-wrap gap-2">
-        {(
-          [
-            ['classes', 'All classes'],
-            ['attendance', 'All attendance'],
-            ['supply', 'On-call / supply'],
-          ] as const
-        ).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setTab(id)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium ${
-              tab === id
-                ? 'bg-emerald-700 text-white'
-                : 'bg-white text-slate-700 ring-1 ring-slate-200'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+    <AppShell title="School Administration Console">
+      <div className="mb-4 flex flex-wrap gap-2 text-left">
+        <div className="flex rounded-md bg-[#0e1118] p-1 border border-[#1c2233]">
+          {(
+            [
+              ['classes', 'Master Schedule'],
+              ['attendance', 'Attendance Records'],
+              ['supply', 'On-Call / Supply Coverage'],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                tab === id
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {tab === 'classes' && (
         <AsyncState loading={classesQuery.loading} error={classesQuery.error}>
           {classesQuery.data && (
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+            <div className="ta-card-elevated overflow-hidden text-left">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="border-b border-[#1c2233] bg-[#0c0f16] text-xs uppercase text-slate-400">
                   <tr>
-                    <th className="px-4 py-3">Course</th>
-                    <th className="px-4 py-3">Teacher</th>
+                    <th className="px-4 py-3">Course Code &amp; Title</th>
+                    <th className="px-4 py-3">Instructor</th>
                     <th className="px-4 py-3">Block</th>
                     <th className="px-4 py-3">Room</th>
                     <th className="px-4 py-3">Enrollment</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-[#181d2a]">
                   {classesQuery.data.classes.map((c) => (
-                    <tr key={c.id} className="border-t border-slate-100">
-                      <td className="px-4 py-3 font-medium">
-                        {c.code}
-                        <span className="block text-xs font-normal text-slate-500">{c.name}</span>
+                    <tr key={c.id}>
+                      <td className="px-4 py-3">
+                        <span className="font-mono font-semibold text-blue-400">{c.code}</span>
+                        <span className="block text-xs text-slate-400">{c.name}</span>
                       </td>
-                      <td className="px-4 py-3">{c.teacher}</td>
-                      <td className="px-4 py-3">{c.block}</td>
-                      <td className="px-4 py-3">{c.room}</td>
-                      <td className="px-4 py-3">{c.enrollment}</td>
+                      <td className="px-4 py-3 text-white font-medium">{c.teacher}</td>
+                      <td className="px-4 py-3 text-slate-400">{c.block}</td>
+                      <td className="px-4 py-3 text-slate-400">{c.room}</td>
+                      <td className="px-4 py-3 font-mono text-white">{c.enrollment} students</td>
                     </tr>
                   ))}
                 </tbody>
@@ -107,36 +109,36 @@ export function AdminDashboard() {
       {tab === 'attendance' && (
         <AsyncState loading={attendanceQuery.loading} error={attendanceQuery.error}>
           {attendanceQuery.data && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <h2 className="mb-2 text-left text-sm font-semibold">Attendance correction</h2>
-              <p className="mb-4 text-left text-xs text-slate-500">
-                Adjust records school-wide. Changes are saved to the API database.
+            <div className="ta-card-elevated p-5 text-left">
+              <h2 className="text-base font-bold text-white tracking-tight">Attendance Correction Console</h2>
+              <p className="mt-0.5 mb-4 text-xs text-slate-400">
+                Official attendance records for York Region District School Board.
               </p>
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] text-left text-sm">
+                <table className="w-full min-w-[640px] text-left text-xs sm:text-sm">
                   <thead>
-                    <tr className="border-b text-xs uppercase text-slate-500">
-                      <th className="py-2 pr-2">Date</th>
-                      <th className="py-2 pr-2">Course</th>
-                      <th className="py-2 pr-2">Student</th>
-                      <th className="py-2 pr-2">Period</th>
+                    <tr className="border-b border-[#1c2233] text-xs uppercase text-slate-400">
+                      <th className="py-2.5 pr-2">Date</th>
+                      <th className="py-2.5 pr-2">Course</th>
+                      <th className="py-2.5 pr-2">Student</th>
+                      <th className="py-2.5 pr-2">Period</th>
                       <th className="py-2">Status</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-[#181d2a]">
                     {attendanceQuery.data.attendance.map((row) => (
-                      <tr key={row.id} className="border-b border-slate-100">
-                        <td className="py-2 pr-2">{row.date}</td>
-                        <td className="py-2 pr-2">{row.courseCode}</td>
-                        <td className="py-2 pr-2">{row.studentName}</td>
-                        <td className="py-2 pr-2">{row.period}</td>
+                      <tr key={row.id}>
+                        <td className="py-2.5 pr-2 font-mono text-slate-400">{row.date}</td>
+                        <td className="py-2.5 pr-2 font-mono font-semibold text-blue-400">{row.courseCode}</td>
+                        <td className="py-2.5 pr-2 font-medium text-white">{row.studentName}</td>
+                        <td className="py-2.5 pr-2 text-slate-400">{row.period}</td>
                         <td className="py-2">
                           <select
                             value={row.status}
                             onChange={(e) =>
                               void patchAttendance(row.id, e.target.value as typeof row.status)
                             }
-                            className="rounded border border-slate-300 px-2 py-1 text-sm capitalize"
+                            className="rounded border border-[#1c2233] bg-[#090b10] px-2 py-1 text-xs text-white capitalize focus:border-blue-500 focus:outline-none"
                           >
                             <option value="present">present</option>
                             <option value="absent">absent</option>
@@ -155,85 +157,89 @@ export function AdminDashboard() {
       )}
 
       {tab === 'supply' && (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2 text-left">
           <form
             onSubmit={(e) => void handleSupplySubmit(e)}
-            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-left"
+            className="ta-card-elevated p-5"
           >
-            <h2 className="mb-3 text-sm font-semibold">Assign supply teacher</h2>
-            <div className="space-y-3 text-sm">
-              <label className="block">
-                <span className="text-slate-600">Date</span>
+            <h2 className="text-base font-bold text-white tracking-tight">Assign Supply Coverage</h2>
+            <p className="mt-0.5 mb-4 text-xs text-slate-400">On-call coverage log</p>
+            <div className="space-y-3 text-xs sm:text-sm">
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Date</label>
                 <input
                   type="date"
                   value={supplyForm.date}
                   onChange={(e) => setSupplyForm((f) => ({ ...f, date: e.target.value }))}
-                  className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5"
+                  className="w-full rounded border border-[#1c2233] bg-[#090b10] px-2.5 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none"
                 />
-              </label>
-              <label className="block">
-                <span className="text-slate-600">Teacher absent</span>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Teacher Absent</label>
                 <input
                   value={supplyForm.teacherAbsent}
                   onChange={(e) =>
                     setSupplyForm((f) => ({ ...f, teacherAbsent: e.target.value }))
                   }
-                  className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5"
-                  placeholder="J. Smith"
+                  className="w-full rounded border border-[#1c2233] bg-[#090b10] px-2.5 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none"
+                  placeholder="e.g. J. Smith"
                 />
-              </label>
-              <label className="block">
-                <span className="text-slate-600">Supply teacher</span>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Supply Teacher</label>
                 <input
                   value={supplyForm.supplyTeacher}
                   onChange={(e) =>
                     setSupplyForm((f) => ({ ...f, supplyTeacher: e.target.value }))
                   }
-                  className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5"
+                  className="w-full rounded border border-[#1c2233] bg-[#090b10] px-2.5 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none"
                 />
-              </label>
-              <label className="block">
-                <span className="text-slate-600">Course code</span>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Course Code</label>
                 <input
                   value={supplyForm.courseCode}
                   onChange={(e) =>
                     setSupplyForm((f) => ({ ...f, courseCode: e.target.value }))
                   }
-                  className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5"
+                  className="w-full rounded border border-[#1c2233] bg-[#090b10] px-2.5 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none"
                   placeholder="MHF4U1-8"
                 />
-              </label>
-              <label className="block">
-                <span className="text-slate-600">Block</span>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Block / Period</label>
                 <input
                   value={supplyForm.block}
                   onChange={(e) => setSupplyForm((f) => ({ ...f, block: e.target.value }))}
-                  className="mt-1 w-full rounded border border-slate-300 px-2 py-1.5"
+                  className="w-full rounded border border-[#1c2233] bg-[#090b10] px-2.5 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none"
                   placeholder="P4"
                 />
-              </label>
+              </div>
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+                className="ta-btn-primary w-full py-2 text-xs font-semibold disabled:opacity-50"
               >
-                {submitting ? 'Saving…' : 'Save assignment'}
+                {submitting ? 'Saving…' : 'Save Assignment'}
               </button>
             </div>
           </form>
+
           <AsyncState loading={supplyQuery.loading} error={supplyQuery.error}>
             {supplyQuery.data && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-left">
-                <h2 className="mb-3 text-sm font-semibold">Scheduled coverage</h2>
-                <ul className="space-y-3 text-sm">
+              <div className="ta-card-elevated p-5">
+                <h2 className="text-base font-bold text-white tracking-tight">Scheduled Coverage</h2>
+                <p className="mt-0.5 mb-4 text-xs text-slate-400">Active roster</p>
+                <ul className="space-y-2.5 text-xs sm:text-sm">
                   {supplyQuery.data.supply.map((s) => (
                     <li
                       key={s.id}
-                      className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"
+                      className="rounded border border-[#1c2233] bg-[#0a0d14] p-3 text-left"
                     >
-                      <p className="font-medium">{s.date}</p>
-                      <p className="text-slate-600">
-                        {s.supplyTeacher} covers {s.courseCode} ({s.block}) for{' '}
+                      <p className="font-mono font-medium text-white">{s.date}</p>
+                      <p className="text-slate-400 text-xs mt-0.5">
+                        <strong className="text-blue-400">{s.supplyTeacher}</strong> covers{' '}
+                        <span className="font-semibold text-white">{s.courseCode}</span> ({s.block}) for{' '}
                         {s.teacherAbsent}
                       </p>
                     </li>

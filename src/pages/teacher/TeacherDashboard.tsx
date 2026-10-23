@@ -42,60 +42,67 @@ export function TeacherDashboard() {
   const records = attendanceQuery.data?.records ?? []
 
   return (
-    <AppShell title="Teacher — Communications & CS">
-      <div className="mb-4 flex flex-wrap gap-2">
-        {(
-          [
-            ['marks', 'Mark input'],
-            ['attendance', 'Attendance'],
-          ] as const
-        ).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setTab(id)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium ${
-              tab === id
-                ? 'bg-emerald-700 text-white'
-                : 'bg-white text-slate-700 ring-1 ring-slate-200'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+    <AppShell title="Teacher Gradebook &amp; Attendance">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="flex rounded-md bg-[#0e1118] p-1 border border-[#1c2233]">
+          {(
+            [
+              ['marks', 'Grade Entry'],
+              ['attendance', 'Attendance Roster'],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition ${
+                tab === id
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <select
           value={selectedCourse}
           onChange={(e) => setSelectedCourse(e.target.value)}
-          className="ml-auto rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+          className="ml-auto rounded-lg border border-[#1c2233] bg-[#0e1118] px-3 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none"
         >
-          <option value="tgj4m">TGJ4M1-1 — Communications Technology</option>
-          <option value="ics4u">ICS4U1-1 — Computer Science</option>
+          <option value="tgj4m">TGJ4M1-1 — Communications Technology (Period 1)</option>
+          <option value="ics4u">ICS4U1-1 — Computer Science (Period 2)</option>
         </select>
       </div>
 
       {tab === 'marks' && (
         <AsyncState loading={reportQuery.loading} error={reportQuery.error}>
           {detail && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-left text-sm font-semibold">Assessment tasks</h2>
+            <div className="ta-card-elevated p-5 text-left">
+              <h2 className="text-base font-bold text-white tracking-tight">Assessment Tasks</h2>
+              <p className="mt-0.5 text-xs text-slate-400 mb-4">
+                Update marks below. Student dashboard averages reflect new evaluations immediately.
+              </p>
+              
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] text-left text-sm">
+                <table className="w-full min-w-[640px] text-left text-xs sm:text-sm">
                   <thead>
-                    <tr className="border-b text-xs uppercase text-slate-500">
-                      <th className="py-2 pr-3">Task</th>
-                      <th className="py-2 pr-3">OE</th>
-                      <th className="py-2 pr-3">Current</th>
-                      <th className="py-2 pr-3">Enter mark</th>
-                      <th className="py-2">Action</th>
+                    <tr className="border-b border-[#1c2233] text-xs uppercase text-slate-400">
+                      <th className="py-2.5 pr-3">Evaluation Task</th>
+                      <th className="py-2.5 pr-3">OE</th>
+                      <th className="py-2.5 pr-3">Current Mark</th>
+                      <th className="py-2.5 pr-3">New Mark</th>
+                      <th className="py-2.5">Action</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-[#181d2a]">
                     {detail.tasks.map((task) => (
-                      <tr key={task.id} className="border-b border-slate-100">
-                        <td className="py-2 pr-3">{task.name}</td>
-                        <td className="py-2 pr-3">{task.expectation}</td>
-                        <td className="py-2 pr-3">{task.mark || '—'}</td>
-                        <td className="py-2 pr-3">
+                      <tr key={task.id}>
+                        <td className="py-2.5 pr-3 font-medium text-white">{task.name}</td>
+                        <td className="py-2.5 pr-3 font-mono text-blue-400 text-xs">{task.expectation}</td>
+                        <td className="py-2.5 pr-3 tabular-nums font-semibold text-white">{task.mark || '—'}</td>
+                        <td className="py-2.5 pr-3">
                           <input
                             type="text"
                             placeholder="e.g. 18/20"
@@ -103,15 +110,15 @@ export function TeacherDashboard() {
                             onChange={(e) =>
                               setMarkDrafts((d) => ({ ...d, [task.id]: e.target.value }))
                             }
-                            className="w-28 rounded border border-slate-300 px-2 py-1 text-sm"
+                            className="w-28 rounded border border-[#1c2233] bg-[#090b10] px-2 py-1 text-xs text-white focus:border-blue-500 focus:outline-none"
                           />
                         </td>
-                        <td className="py-2">
+                        <td className="py-2.5">
                           <button
                             type="button"
                             disabled={savingId === task.id}
                             onClick={() => void saveMark(task.id)}
-                            className="rounded bg-emerald-700 px-2 py-1 text-xs font-medium text-white hover:bg-emerald-600 disabled:opacity-60"
+                            className="ta-btn-primary px-3 py-1 text-xs font-medium disabled:opacity-50"
                           >
                             {savingId === task.id ? 'Saving…' : 'Save'}
                           </button>
@@ -121,44 +128,40 @@ export function TeacherDashboard() {
                   </tbody>
                 </table>
               </div>
-              <p className="mt-3 text-left text-xs text-slate-500">
-                Marks are persisted to the API database (
-                <code className="text-xs">api/data/db.json</code>).
-              </p>
             </div>
           )}
         </AsyncState>
       )}
 
       {tab === 'attendance' && (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <span className="text-sm font-medium text-slate-700">Quick actions</span>
+        <div className="space-y-4 text-left">
+          <div className="flex flex-wrap items-center justify-between gap-3 ta-card p-4">
+            <span className="text-xs text-slate-400">Class Attendance Action</span>
             <button
               type="button"
               onClick={() => void markAllPresent('2026-10-23')}
-              className="rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-medium text-white"
+              className="ta-btn-primary px-3 py-1.5 text-xs font-medium"
             >
-              Mark all present — Oct 23
+              Mark all students present today
             </button>
           </div>
           <AsyncState loading={attendanceQuery.loading} error={attendanceQuery.error}>
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <h2 className="mb-3 text-left text-sm font-semibold">Recent attendance</h2>
-              <table className="w-full text-left text-sm">
+            <div className="ta-card-elevated p-5">
+              <h2 className="mb-3 text-base font-bold text-white tracking-tight">Recent Period Attendance</h2>
+              <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
-                  <tr className="border-b text-xs uppercase text-slate-500">
+                  <tr className="border-b border-[#1c2233] text-xs uppercase text-slate-400">
                     <th className="py-2">Date</th>
                     <th className="py-2">Student</th>
                     <th className="py-2">Status</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-[#181d2a]">
                   {records.map((row) => (
-                    <tr key={row.id} className="border-b border-slate-100">
-                      <td className="py-2">{row.date}</td>
-                      <td className="py-2">{row.studentName}</td>
-                      <td className="py-2 capitalize">{row.status}</td>
+                    <tr key={row.id}>
+                      <td className="py-2.5 font-mono text-slate-400">{row.date}</td>
+                      <td className="py-2.5 font-medium text-white">{row.studentName}</td>
+                      <td className="py-2.5 capitalize text-emerald-400">{row.status}</td>
                     </tr>
                   ))}
                 </tbody>

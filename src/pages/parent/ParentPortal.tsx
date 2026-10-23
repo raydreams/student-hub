@@ -10,33 +10,43 @@ export function ParentPortal() {
   const { data, loading, error } = useAsyncData(() => api.student.courses(), [])
 
   return (
-    <AppShell title={`Parent portal — linked student ${user?.studentId ?? '…'}`}>
+    <AppShell title={`Parent Portal — Linked Student ${user?.studentId ?? '…'}`}>
       <AsyncState loading={loading} error={error}>
         {data && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-left">
-            <p className="text-sm text-slate-600">
-              View-only access to your child&apos;s course marks and reports. Contact the school
-              office to link additional students.
+          <div className="ta-card-elevated p-6 text-left">
+            <h2 className="text-base font-bold text-white tracking-tight">
+              Academic Progress &amp; Course Standing
+            </h2>
+            <p className="mt-1 text-xs text-slate-400">
+              Official read-only access to course evaluation reports and mark breakdowns.
             </p>
-            <ul className="mt-4 divide-y divide-slate-100">
+
+            <ul className="mt-5 divide-y divide-[#1c2233]">
               {data.courses
                 .filter((c) => c.currentMark != null)
                 .map((course) => (
                   <li
                     key={course.id}
-                    className="flex flex-wrap items-center justify-between gap-2 py-3"
+                    className="flex flex-wrap items-center justify-between gap-3 py-3.5"
                   >
                     <div>
-                      <p className="font-medium text-slate-900">
-                        {course.code} — {course.name}
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-semibold text-blue-400">
+                          {course.code}
+                        </span>
+                        <p className="font-medium text-sm text-white">
+                          {course.name}
+                        </p>
+                      </div>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        Room {course.room} · Period {course.block} · {course.dateRange}
                       </p>
-                      <p className="text-xs text-slate-500">{course.dateRange}</p>
                     </div>
                     <Link
                       to={`/student/course/${course.id}`}
-                      className="font-semibold text-blue-600 hover:underline"
+                      className="ta-btn-secondary px-3 py-1.5 text-xs font-medium"
                     >
-                      {course.currentMark!.toFixed(1)}% report
+                      {course.currentMark!.toFixed(1)}% Full Report →
                     </Link>
                   </li>
                 ))}

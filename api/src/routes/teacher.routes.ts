@@ -1,7 +1,6 @@
 import { Router } from 'express'
 import { loadDatabase, updateDatabase } from '../db.js'
 import { appendGradeHistory } from '../lib/grades.js'
-import type { AuthedRequest } from '../middleware/auth.js'
 import { requireAuth, requireRoles } from '../middleware/auth.js'
 
 const COURSE_META: Record<string, { code: string; period: string }> = {

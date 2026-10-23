@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { loadDatabase, updateDatabase } from '../db.js'
+import { createDefaultDatabase } from '../seed/default-db.js'
 import { appendGradeHistory, computeOverallAverage } from '../lib/grades.js'
 import type { AuthedRequest } from '../middleware/auth.js'
 import { linkedStudentId, requireAuth, requireRoles } from '../middleware/auth.js'
@@ -128,3 +129,70 @@ studentRouter.post('/simulate-assessment', (req: AuthedRequest, res) => {
     gradeHistory: history,
   })
 })
+
+/** Add custom assessment that drops or adjusts average */
+studentRouter.post('/add-assessment', (req: AuthedRequest, res) => {
+  const studentId = linkedStudentId(req.user!)
+  if (req.user!.role !== 'student') {
+    res.status(403).json({ error: 'Students only' })
+    return
+  }
+  const { courseId = 'mhf4u', title = 'Pop Quiz', markPercent = 64 } = (req.body || {}) as {
+    courseId?: string
+    title?: string
+    markPercent?: number
+  }
+  const parsedMark = Number(markPercent)
+  const db = updateDatabase((db) => {
+    if (studentId !== db.studentId) return
+    const course = db.courses.find((c) => c.id === courseId)
+    if (course && course.currentMark != null) {
+      // Blend 85% old mark with 15% new assessment mark to simulate drop
+      const newMark = Math.round((course.currentMark * 0.85 + parsedMark * 0.15) * 10) / 10
+      course.currentMark = Math.max(45, Math.min(100, newMark))
+    }
+    const courseCode = course?.code || courseId.toUpperCase()
+    appendGradeHistory(db, `Assessment added: ${title} (${parsedMark}%) in ${courseCode}`)
+    db.inbox.unshift({
+      id: `in${Date.now()}`,
+      from: 'J. Smith',
+      subject: `${courseCode}: ${title} marked`,
+      preview: `Mark for ${title} (${parsedMark}%) posted. Course mark updated to ${course?.currentMark?.toFixed(1)}%.`,
+      sentAt: new Date().toISOString(),
+      read: false,
+      category: 'grade',
+    })
+  })
+  const overallAverage = computeOverallAverage(db.courses)
+  const history = db.gradeHistory
+  res.json({
+    ok: true,
+    overallAverage,
+    previousAverage: history.length >= 2 ? history[history.length - 2].overallAverage : overallAverage,
+    gradeHistory: history,
+  })
+})
+
+/** Reset demo data to default initial high average */
+studentRouter.post('/reset-demo', (req: AuthedRequest, res) => {
+  const studentId = linkedStudentId(req.user!)
+  if (req.user!.role !== 'student') {
+    res.status(403).json({ error: 'Students only' })
+    return
+  }
+  const fresh = createDefaultDatabase()
+  const db = updateDatabase((db) => {
+    if (studentId !== db.studentId) return
+    db.courses = fresh.courses
+    db.gradeHistory = fresh.gradeHistory
+    db.inbox = fresh.inbox
+  })
+  const overallAverage = computeOverallAverage(db.courses)
+  res.json({
+    ok: true,
+    overallAverage,
+    previousAverage: overallAverage,
+    gradeHistory: db.gradeHistory,
+  })
+})
+
